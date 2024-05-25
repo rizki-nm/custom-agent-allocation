@@ -13,3 +13,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Agent {
+  agent_id String @unique
+  name String
+  available Boolean
+  limit Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("agents")
+}
