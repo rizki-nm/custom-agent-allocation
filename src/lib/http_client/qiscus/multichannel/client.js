@@ -23,9 +23,8 @@ class QiscusMultichannelClient {
 
     async assignAgent(roomId, agentId) {
         try {
-            // TODO:
-            const response = await this.client.post('/', { room_id: roomId, agent_id: agentId });
-            return response.data;
+            await this.client.post('/api/v1/admin/service/assign_agent', { room_id: roomId, agent_id: agentId });
+            return true;
         } catch (error) {
             throw new Error(error);
         }

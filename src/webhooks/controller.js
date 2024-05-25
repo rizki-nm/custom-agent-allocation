@@ -2,16 +2,21 @@ import { logger } from "../application/logging.js";
 import service from "./service.js";
 
 const assign = async (req, res) => {
-    const { email, name, room_id } = req.body;
+    const { room_id } = req.body;
 
-    const agentName = await service.assignService(email, name, room_id);
+    try {
+        const assign = await service.assignService(room_id);
 
-    if (agentName) {
-        logger.info({ 'customerName': name, room_id, agentName });
-    } else if (agentName === false) {
-        logger.error("ayo agents cepat :D");
-    } else {
-        logger.info({ 'customerName': name, room_id, 'antri': true });
+        if (assign) {
+            logger.info({ room_id, assign });
+            res.status(200).json({ message: 'Agent assigned successfully' });
+        } else {
+            logger.info({ room_id, 'in_queue': true });
+            res.status(200).json({ message: 'Customer is in queue' });
+        }
+    } catch (error) {
+        logger.error(`Failed to assign agent: ${error}`);
+        res.status(500).json({ error: 'Failed to assign agent' });
     }
 }
 
@@ -25,6 +30,7 @@ const resolve = async (req, res) => {
         logger.info("Tidak ada antrian");
     }
 }
+
 
 export default {
     assign,

@@ -1,63 +1,85 @@
-import { db } from "../application/database.js";
+import { PrismaClient } from '@prisma/client';
 
-const findCustomerByRoomId = async (roomId) => {
-    const query = 'SELECT id, name FROM customers WHERE room_id = $1';
-    const result = await db.query(query, [roomId]);
+const prisma = new PrismaClient();
 
-    return result.rows[0];
+const insertQueue = async (roomId) => {
+    return prisma.queue.create({
+        data: {
+            room_id: roomId,
+            resolved: false
+        }
+    })
 }
 
-const insertCustomer = async (email, name, roomId) => {
-    const query = 'INSERT INTO customers (email, name, room_id) VALUES ($1, $2, $3)';
-    return await db.query(query, [email, name, roomId]);
+const findAvailableAgent = async () => {
+    const agents = await prisma.agent.findMany({
+        where: {
+            available: true,
+        },
+        include: {
+            queues: {
+                where: {
+                    resolved: false,
+                },
+            },
+        },
+    });
+
+    // Filter agents based on the limit
+    return agents.filter(agent => agent.queues.length < agent.limit || agent.queues.length === 0);
+};
+
+const updateQueueWithAgent = async (roomId, agentId) => {
+    return prisma.queue.update({
+        where: {
+            room_id: roomId
+        },
+        data: {
+            agent: {
+                connect: {
+                    agent_id: agentId
+                }
+            }
+        }
+    })
 }
 
-const getAvailableAgent = async (max) => {
-    const query = 'SELECT id, name FROM agents WHERE id NOT IN (SELECT agent_id FROM agent_customer_mapping WHERE resolved = false GROUP BY agent_id HAVING COUNT(agent_id) >= $1) LIMIT 1';
-    const result = await db.query(query, [max]);
+const findAgentById = async (agentId) => {
+    return prisma.agent.findUnique({
+        where: { agent_id: agentId }
+    });
+};
 
-    return result;
-}
+const findQueueByRoomId = async (roomId) => {
+    return prisma.queue.findUnique({
+        where: { room_id: roomId }
+    });
+};
 
-const insertAgentAndCustomer = async (agentId, customerId) => {
-    const query = 'INSERT INTO agent_customer_mapping (agent_id, customer_id) VALUES ($1, $2)';
-    await db.query(query, [agentId, customerId]);
-}
+const createQueue = async (roomId, agentId) => {
+    return prisma.queue.create({
+        data: {
+            room_id: roomId,
+            agent: {
+                connect: { agent_id: agentId }
+            }
+        }
+    });
+};
 
-const updateResolveRoom = async (customerId) => {
-    const query = 'UPDATE agent_customer_mapping SET resolved = true WHERE customer_id = $1';
-    await db.query(query, [customerId]);
-}
-
-const getAgentResolve = async (customerId) => {
-    // const query = 'SELECT agent_id FROM agent_customer_mapping WHERE customer_id = $1';
-    const query = 'SELECT id, name FROM agents WHERE id IN (SELECT agent_id FROM agent_customer_mapping WHERE customer_id = $1)';
-    const result = await db.query(query, [customerId]);
-
-    return result.rows[0];
-}
-
-const getNextCust = async () => {
-    const query = `
-    SELECT id, name, room_id
-    FROM customers
-    WHERE id NOT IN (
-      SELECT customer_id
-      FROM agent_customer_mapping
-    )
-    ORDER BY timestamp ASC;
-    `;
-    const result = await db.query(query);
-
-    return result;
-}
+const updateQueueResolvedStatus = async (roomId) => {
+    return prisma.queue.update({
+        where: { room_id: roomId },
+        data: { resolved: true }
+    });
+};
 
 export default {
-    insertCustomer,
-    findCustomerByRoomId,
-    getAvailableAgent,
-    insertAgentAndCustomer,
-    updateResolveRoom,
-    getAgentResolve,
-    getNextCust,
-}
+    insertQueue,
+    findAvailableAgent,
+    updateQueueWithAgent,
+    findAgentById,
+    findQueueByRoomId,
+    createQueue,
+    updateQueueResolvedStatus
+};
