@@ -1,0 +1,19 @@
+{
+  "name": "latihan-caa",
+  "version": "1.0.0",
+  "description": "Task Buat Aplikasi CAA - NP-3bb426",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Rizki Nuzul Muzaki",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "pg": "^8.11.3",
+    "winston": "^3.11.0"
+  }
+}
