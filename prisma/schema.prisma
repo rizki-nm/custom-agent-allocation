@@ -19,8 +19,24 @@ model Agent {
   available Boolean
   limit Int
 
+  queues Queue[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("agents")
+}
+
+model Queue {
+  room_id String @unique
+  resolved Boolean
+
+  agent_id String
+
+  agent Agent @relation(fields: [agent_id], references: [agent_id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("queues")
 }
