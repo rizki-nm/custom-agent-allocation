@@ -58,10 +58,45 @@ const updateQueueResolvedStatus = async (roomId) => {
     });
 };
 
+const findAgentById = async (agentIdStr) => {
+    return prisma.agent.findUnique({
+        where: {
+            agent_id: agentIdStr
+        }
+    });
+};
+
+const updateAgent = async (agentIdStr, name, available, limit) => {
+    return prisma.agent.update({
+        where: {
+            agent_id: agentIdStr
+        },
+        data: {
+            name,
+            available,
+            limit
+        }
+    });
+};
+
+const createAgent = async (agentIdStr, name, available, limit) => {
+    return prisma.agent.create({
+        data: {
+            agent_id: agentIdStr,
+            name,
+            available,
+            limit
+        }
+    });
+};
+
 export default {
     insertQueue,
     findAvailableAgent,
     updateQueueWithAgent,
     getNextQueue,
-    updateQueueResolvedStatus
+    updateQueueResolvedStatus,
+    findAgentById,
+    updateAgent,
+    createAgent
 };

@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
 import { logger } from "../application/logging.js";
 import qiscusClient from "../lib/http_client/qiscus/multichannel/qiscusClient.js";
-
-const prisma = new PrismaClient();
+import repository from "../webhooks/repository.js";
 
 export default async (req, res, next) => {
     try {
@@ -12,32 +10,12 @@ export default async (req, res, next) => {
             const agentIdStr = agentData.id.toString();
             const limitInt = parseInt(process.env.MAX_AGENT_HANDLE, 10);
 
-            const existingAgent = await prisma.agent.findUnique({
-                where: {
-                    agent_id: agentIdStr
-                }
-            });
+            const existingAgent = await repository.findAgentById(agentIdStr)
 
             if (existingAgent) {
-                await prisma.agent.update({
-                    where: {
-                        agent_id: agentIdStr
-                    },
-                    data: {
-                        name: agentData.name,
-                        available: agentData.is_available,
-                        limit: limitInt
-                    }
-                });
+                await repository.updateAgent(agentIdStr, agentData.name, agentData.is_available, limitInt)
             } else {
-                await prisma.agent.create({
-                    data: {
-                        agent_id: agentIdStr,
-                        name: agentData.name,
-                        available: agentData.is_available,
-                        limit: limitInt
-                    }
-                });
+                await repository.createAgent(agentIdStr, agentData.name, agentData.is_available, limitInt);
             }
         }
 
