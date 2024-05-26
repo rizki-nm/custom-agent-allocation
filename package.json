@@ -1,7 +1,7 @@
 {
-  "name": "latihan-caa",
+  "name": "custom-agent-allocation",
   "version": "1.0.0",
-  "description": "Task Buat Aplikasi CAA - NP-3bb426",
+  "description": "Custom Agent Allocation Apps",
   "main": "src/main.js",
   "scripts": {
     "dev": "nodemon src/main.js",
