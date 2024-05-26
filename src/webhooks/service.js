@@ -46,6 +46,8 @@ const assignAgentToOC = async (room_id) => {
             await repository.updateQueueWithAgent(room_id, assignedAgent.agent_id);
             return true;
         } catch (error) {
+            logger.error(`Failed to assign agent: ${error}`);
+
             return false;
         }
     } else {
