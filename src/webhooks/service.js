@@ -13,44 +13,43 @@ const assignService = async (roomId) => {
         return false;
     }
 
+    return await assignAgentToOC(roomId);
+};
+
+const resolveService = async (roomId) => {
+    try {
+        await repository.updateQueueResolvedStatus(roomId);
+
+        const nextQueue = await repository.getNextQueue();
+
+        if (nextQueue) {
+            const nextRoomId = nextQueue.room_id;
+
+            return await assignAgentToOC(nextRoomId);
+        } else {
+            return false;
+        }
+    } catch (error) {
+        logger.error(`Failed to resolve queue: ${error}`);
+        throw error;
+    }
+}
+
+const assignAgentToOC = async (room_id) => {
     const agentData = await repository.findAvailableAgent();
 
     if (agentData.length > 0) {
         const assignedAgent = agentData[0];
 
         try {
-            await qiscusClient.assignAgent(roomId, assignedAgent.agent_id);
-            await repository.updateQueueWithAgent(roomId, assignedAgent.agent_id);
+            await qiscusClient.assignAgent(room_id, assignedAgent.agent_id);
+            await repository.updateQueueWithAgent(room_id, assignedAgent.agent_id);
             return true;
         } catch (error) {
             return false;
         }
     } else {
         return false;
-    }
-};
-
-const resolveService = async (roomId) => {
-    repository.updateQueueResolvedStatus(roomId)
-
-    // Ambil queue sesuai antrian
-    const nextCustResult = await repository.getNextCust();
-
-    if (nextCustResult.rows.length > 0) {
-        const nextRoomId = nextCustResult.rows[0].room_id;
-
-        const agentData = await repository.findAvailableAgent();
-
-        // Simpan informasi tentang agent yang menangani customer
-        await repository.updateQueueWithAgent(nextRoomId, agentData[0].agent_id);
-
-        try {
-            await qiscusClient.assignAgent(roomId, assignedAgent.agent_id);
-            await repository.updateQueueWithAgent(roomId, assignedAgent.agent_id);
-            return true;
-        } catch (error) {
-            return false;
-        }
     }
 }
 

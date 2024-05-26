@@ -44,26 +44,10 @@ const updateQueueWithAgent = async (roomId, agentId) => {
     })
 }
 
-const findAgentById = async (agentId) => {
-    return prisma.agent.findUnique({
-        where: { agent_id: agentId }
-    });
-};
-
-const findQueueByRoomId = async (roomId) => {
-    return prisma.queue.findUnique({
-        where: { room_id: roomId }
-    });
-};
-
-const createQueue = async (roomId, agentId) => {
-    return prisma.queue.create({
-        data: {
-            room_id: roomId,
-            agent: {
-                connect: { agent_id: agentId }
-            }
-        }
+const getNextQueue = async () => {
+    return prisma.queue.findFirst({
+        where: { resolved: false, agent_id: null },
+        orderBy: { createdAt: 'asc' },
     });
 };
 
@@ -78,8 +62,6 @@ export default {
     insertQueue,
     findAvailableAgent,
     updateQueueWithAgent,
-    findAgentById,
-    findQueueByRoomId,
-    createQueue,
+    getNextQueue,
     updateQueueResolvedStatus
 };

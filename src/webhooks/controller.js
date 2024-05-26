@@ -24,10 +24,18 @@ const resolve = async (req, res) => {
     const { room_id } = req.body.service;
 
     try {
-        const { nextCustName, nextRoomId, agentName } = await service.resolveService(room_id);
-        logger.info({ 'customerName': nextCustName, 'room_id': nextRoomId, agentName, 'antri': false });
+        const resolveAndAssignNextQueue = await service.resolveService(room_id);
+
+        if (resolveAndAssignNextQueue) {
+            logger.info({ room_id, resolveAndAssignNextQueue });
+            res.status(200).json({ message: 'Room resolved and assigned next queue successfully' });
+        } else {
+            logger.info({ message: 'Room resolved successfully' });
+            res.status(200).json({ message: 'Room resolved successfully' });
+        }
     } catch (error) {
-        logger.info("Tidak ada antrian");
+        logger.error(error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 }
 
