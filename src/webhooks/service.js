@@ -39,7 +39,7 @@ const assignAgentToOC = async (room_id) => {
     const agentData = await repository.findAvailableAgent();
 
     if (agentData.length > 0) {
-        const assignedAgent = agentData[0];
+        const assignedAgent = selectAgent(agentData);
 
         try {
             await qiscusClient.assignAgent(room_id, assignedAgent.agent_id);
@@ -52,6 +52,13 @@ const assignAgentToOC = async (room_id) => {
         return false;
     }
 }
+
+// Selects the agent with the least number of unresolved queues
+const selectAgent = (agents) => {
+    return agents.reduce((currentAgent, nextAgent) => {
+        return (currentAgent.queues.length <= nextAgent.queues.length) ? currentAgent : nextAgent;
+    });
+};
 
 export default {
     assignService,
