@@ -42,8 +42,8 @@ const assignAgentToOC = async (room_id) => {
         const assignedAgent = selectAgent(agentData);
 
         try {
-            await qiscusClient.assignAgent(room_id, assignedAgent.agent_id);
             await repository.updateQueueWithAgent(room_id, assignedAgent.agent_id);
+            await qiscusClient.assignAgent(room_id, assignedAgent.agent_id);
             return true;
         } catch (error) {
             logger.error(`Failed to assign agent: ${error}`);
