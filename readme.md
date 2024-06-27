@@ -51,3 +51,17 @@ $ npx prisma migrate dev
 ```bash
 $ npm run dev
 ```
+
+## Installation using Docker
+
+Create docker-compose.yml file and fill environment
+
+```bash
+cp docker-compose.yml.example docker-compose.yml
+```
+
+Start the App
+
+```bash
+docker compose up
+```
