@@ -1,0 +1,27 @@
+services:
+  api:
+    container_name: api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: custom-agent-allocation
+    ports:
+      - 3000:3000
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@db:5432/custom-agent-allocation"
+      MAX_AGENT_HANDLE: 2
+      MULTICHANNEL_URL: https://multichannel.qiscus.com
+      APP_ID:
+      APP_SECRET_KEY:
+    depends_on:
+      - db
+
+  db:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: custom-agent-allocation
+    ports:
+      - "5432:5432"
